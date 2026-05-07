@@ -244,7 +244,7 @@ const headers = TOKEN ? { 'Authorization': `Bearer ${TOKEN}` } : {};
     
     currentCombinedResult = { user: userData, repositories: reposData };
     const jsonStr = JSON.stringify(currentCombinedResult, null, 2);
-    preElement.innerHTML = jsonStr;
+    ///preElement.innerHTML = jsonStr;
     updateStatus("Fetch completed. Click 'Create Database' to build SQLite DB.");
     enableButtons(true, false);
   } catch (err) {
