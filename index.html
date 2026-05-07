@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full w-full overflow-hidden">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>GitHub Repositories · SQLite Exporter (full fields)</title>
+<link rel="stylesheet" href="all.min.css">
+<script src="tailwind.js"></script>
+<script>
+tailwind.config = {
+darkMode: 'class',
+theme: {
+extend: {
+colors: {
+githubDark: '#0d1117',
+githubCard: '#161b22',
+githubBorder: '#30363d',
+githubText: '#c9d1d9',
+githubSubtext: '#8b949e',
+githubOrange: '#f0883e',
+jaferBorder: 'rgb(61, 68, 77)',
+jaferText: 'rgb(145, 152, 161)',
+githubHoverBorder: '#8b949e',
+githubHoverText: '#c9d1d9',
+githubBlue: '#3b82f6',
+}
+}
+}
+}
+</script>
+<style>
+::-webkit-scrollbar { display: none; width: 0; height: 0; }
+* { scrollbar-width: none; }
+</style>
+</head>
+<body class="h-full w-full overflow-hidden p-0 m-0 flex flex-col flex-nowrap bg-githubDark text-githubText antialiased">
+
+<header id="mainHeader" class="sticky top-0 z-10 bg-githubDark/95 backdrop-blur-sm border-b border-githubBorder px-3 py-2 flex items-center justify-between gap-2">
+<div class="flex items-center gap-2">
+<button id="menuBtn" class="w-8 h-8 border border-jaferBorder rounded-md bg-transparent text-jaferText inline-flex items-center justify-center transition-all duration-200 cursor-pointer hover:bg-githubHoverBg hover:border-githubSubtext hover:text-githubText">
+<i class="fas fa-bars text-base"></i>
+</button>
+<a href="#" class="text-white"><i class="fab fa-github-alt text-2xl"></i></a>
+<span id="headerUsername" class="font-semibold text-sm sm:text-base truncate max-w-[120px] sm:max-w-none">otapt2011</span>
+</div>
+<div class="flex items-center gap-2">
+<button id="searchHeaderBtn" class="w-8 h-8 border border-jaferBorder rounded-md bg-transparent text-jaferText inline-flex items-center justify-center transition-all duration-200 cursor-pointer hover:bg-githubHoverBg hover:border-githubSubtext hover:text-githubText"><i class="fas fa-search text-base"></i></button>
+<button id="addHeaderBtn" class="w-8 h-8 border border-jaferBorder rounded-md bg-transparent text-jaferText inline-flex items-center justify-center transition-all duration-200 cursor-pointer hover:bg-githubHoverBg hover:border-githubSubtext hover:text-githubText"><i class="fas fa-circle-plus text-base"></i></button>
+<div class="relative inline-block">
+<button id="inboxHeaderBtn" class="w-8 h-8 border border-jaferBorder rounded-md bg-transparent text-jaferText inline-flex items-center justify-center transition-all duration-200 cursor-pointer hover:bg-githubHoverBg hover:border-githubSubtext hover:text-githubText">
+<i class="fas fa-inbox text-base"></i>
+</button>
+<span class="absolute -top-1 -right-1 w-2 h-2 bg-githubBlue rounded-full border border-githubDark"></span>
+</div>
+<img id="headerAvatar" class="w-8 h-8 rounded-full border border-githubBorder cursor-pointer hover:opacity-80 transition" src="https://github.com/otapt2011.png" alt="avatar">
+</div>
+</header>
+
+<div id="mainContent" class="flex-1 overflow-hidden min-h-0 w-full px-4 py-4">
+<div id="reposContainer" class="space-y-3 h-full w-full relative">
+<div class="border border-githubBorder rounded-lg overflow-hidden bg-githubCard h-full w-full flex flex-col gap-3">
+<div class="flex flex-col flex-1 overflow-hidden min-h-0 w-full gap-6">
+<div class="flex gap-6 items-center space-between flex-wrap">
+<button id="fetchDataBtn" class="border border-jaferBorder rounded-md bg-githubBlue text-white px-3 py-1 text-sm inline-flex items-center gap-2 transition-all duration-200 cursor-pointer hover:bg-blue-600">
+<i class="fas fa-download"></i> Fetch Data
+</button>
+<button id="createDbBtn" class="border border-jaferBorder rounded-md bg-githubOrange text-white px-3 py-1 text-sm inline-flex items-center gap-2 transition-all duration-200 cursor-pointer hover:opacity-80" disabled>
+<i class="fas fa-database"></i> Create Database
+</button>
+<button id="downloadJsonBtn" class="border border-jaferBorder rounded-md bg-transparent text-jaferText inline-flex items-center justify-center transition-all duration-200 cursor-pointer hover:bg-githubHoverBg hover:border-githubSubtext hover:text-githubText px-3 py-1 text-sm gap-1" disabled>
+<i class="fas fa-file-json"></i> Download JSON
+</button>
+<button id="copyJsonBtn" class="border border-jaferBorder rounded-md bg-transparent text-jaferText inline-flex items-center justify-center transition-all duration-200 cursor-pointer hover:bg-githubHoverBg hover:border-githubSubtext hover:text-githubText px-3 py-1 text-sm gap-1" disabled>
+<i class="fas fa-copy"></i> Copy JSON
+</button>
+<button id="downloadDbBtn" class="border border-jaferBorder rounded-md bg-transparent text-jaferText inline-flex items-center justify-center transition-all duration-200 cursor-pointer hover:bg-githubHoverBg hover:border-githubSubtext hover:text-githubText px-3 py-1 text-sm gap-1" disabled>
+<i class="fas fa-save"></i> Download DB
+</button>
+</div>
+<pre id="pre" class="flex-1 p-2 whitespace-pre-wrap break-words bg-githubCard w-full h-full overflow-hidden overflow-y-auto text-xs border-[0.5px] border-githubOrange">No data loaded. Click "Fetch Data" to start.</pre>
+</div>
+</div>
+<div id="loader" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center bg-githubCard overflow-hidden hidden">
+<div class="w-10 h-10 border-[3px] border-githubBorder border-t-githubOrange rounded-full animate-spin mx-auto"></div>
+</div>
+</div>
+</div>
+
+<footer id="mainFooter" class="sticky bottom-0 z-10 bg-githubDark/95 backdrop-blur-sm border-t border-githubBorder px-3 py-1 flex items-center justify-center gap-2 h-6 text-xs text-githubSubtext">
+<span id="statusMsg">Ready. Click "Fetch Data".</span>
+</footer>
+
+<!-- JaferSQL library (same as before, embedded here for completeness) -->
+<script>
+// JaferSQL v1.4.0 – full library (minified version, same as previously used)
+(function(g){'use strict';const w=typeof window==='undefined'&&typeof importScripts==='function';const b=typeof window!=='undefined';let c={sqlJsUrl:'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js',wasmLocateFile:null,useCache:false,cacheHelper:null};function e(m,c){this.name='JaferSQLError';this.message=m;this.cause=c;this.stack=(new Error()).stack}e.prototype=Object.create(Error.prototype);function f(m,c){this.name='JaferLoadError';this.message=m;this.cause=c;this.stack=(new Error()).stack}f.prototype=Object.create(e.prototype);function h(m,c){this.name='JaferInitError';this.message=m;this.cause=c;this.stack=(new Error()).stack}h.prototype=Object.create(e.prototype);function i(m,c,s,p){this.name='JaferQueryError';this.message=m;this.cause=c;this.sql=s;this.params=p;this.stack=(new Error()).stack}i.prototype=Object.create(e.prototype);let S=null,P=null,pc=[];function emit(s,d){pc.forEach(cb=>{try{cb(s,d)}catch(e){}})}async function ra(){let u=c.sqlJsUrl,l=c.wasmLocateFile;if(c.useCache&&b){try{const ch=c.cacheHelper||(g.JaferSQLCache||null);if(ch&&typeof ch.getCachedConfig==='function'){emit('cache',{message:'Checking cache for assets'});const ca=await ch.getCachedConfig();u=ca.jsUrl;if(!l)l=(file)=>ca.wasmUrl;emit('cache',{message:'Using cached assets'})}}catch(e){emit('cache',{message:'Cache miss, falling back to CDN'})}}return{jsUrl:u,wasmLocate:l}}function ls(){if(S){emit('ready',{message:'Already loaded'});return Promise.resolve(S)}if(P)return P;emit('loading',{message:'Resolving asset URLs'});P=ra().then(({jsUrl,wasmLocate})=>{return new Promise((resolve,reject)=>{if(w){try{emit('loading',{message:'Importing script in worker: '+jsUrl});importScripts(jsUrl);if(self.initSqlJs){const loc=wasmLocate||(file=>jsUrl.substring(0,jsUrl.lastIndexOf('/')+1)+file);self.initSqlJs({locateFile:loc}).then(sqlJs=>{S=sqlJs;emit('ready',{message:'SQLite engine ready (worker)'});resolve(S)}).catch(err=>reject(new f('WASM init failed in worker',err)))}else reject(new f('initSqlJs not exposed after importScripts'))}catch(e){reject(new f('importScripts failed',e))}}else if(b){var s=document.createElement('script');s.src=jsUrl;s.onload=()=>{emit('wasm',{message:'Script loaded, initialising WASM'});if(g.initSqlJs){const loc=wasmLocate||(file=>jsUrl.substring(0,jsUrl.lastIndexOf('/')+1)+file);g.initSqlJs({locateFile:loc}).then(sqlJs=>{S=sqlJs;emit('ready',{message:'SQLite engine ready'});resolve(S)}).catch(err=>reject(new f('WASM initialisation failed',err)))}else reject(new f('initSqlJs not exposed by sql.js'))};s.onerror=()=>reject(new f('Failed to load sql.js script from: '+jsUrl));document.head.appendChild(s)}else reject(new f('Unsupported environment'))})});return P}function vp(params,sql){if(params==null)return[];if(Array.isArray(params)||(typeof params==='object'&&params!==null))return params;throw new i('Parameters must be array or object',null,sql,params)}function DB(raw){this._db=raw;this._closed=false}DB.prototype={_checkOpen:function(){if(this._closed)throw new i('Database is closed')},jaferExec:function(sql){this._checkOpen();try{return this._db.exec(sql)}catch(e){throw new i('Execution failed',e,sql)}},jaferRun:function(sql,params){this._checkOpen();params=vp(params,sql);try{this._db.run(sql,params);return{changes:this._db.getRowsModified()}}catch(e){throw new i('Run failed',e,sql,params)}},jaferGet:function(sql,params){this._checkOpen();params=vp(params,sql);var stmt=null;try{stmt=this._db.prepare(sql);stmt.bind(params);if(stmt.step())return stmt.getAsObject();return null}catch(e){throw new i('Get failed',e,sql,params)}finally{if(stmt)stmt.free()}},jaferAll:function(sql,params){this._checkOpen();params=vp(params,sql);var stmt=null,rows=[];try{stmt=this._db.prepare(sql);stmt.bind(params);while(stmt.step())rows.push(stmt.getAsObject());return rows}catch(e){throw new i('All failed',e,sql,params)}finally{if(stmt)stmt.free()}},jaferExport:function(){this._checkOpen();try{var data=this._db.export();emit('export',{bytes:data.length});return data}catch(e){throw new i('Export failed',e)}},jaferImportSQL:function(sqlString){this._checkOpen();try{var stmts=sqlString.split(';').map(s=>s.trim()).filter(s=>s.length);for(var i=0;i<stmts.length;i++)this._db.run(stmts[i]);emit('import',{statements:stmts.length})}catch(e){throw new i('SQL import failed',e,sqlString)}},jaferExportJSON:function(tq){var sql=(tq.toLowerCase().trim().startsWith('select'))?tq:'SELECT * FROM '+tq;return JSON.stringify(this.jaferAll(sql),null,2)},jaferExportCSV:function(tq,del){del=del||',';var sql=(tq.toLowerCase().trim().startsWith('select'))?tq:'SELECT * FROM '+tq;var rows=this.jaferAll(sql);if(!rows.length)return '';var h=Object.keys(rows[0]);var csv=[h.join(del)];rows.forEach(r=>{var vals=h.map(k=>{var v=r[k];if(typeof v==='string'&&(v.includes(del)||v.includes('"')))return '"'+v.replace(/"/g,'""')+'"';return v});csv.push(vals.join(del))});return csv.join('\n')},jaferPragma:function(p,v){if(v!==undefined){this.jaferRun('PRAGMA '+p+' = '+v);return null}var r=this.jaferAll('PRAGMA '+p);return r.length===1?r[0]:r},jaferStats:function(){this._checkOpen();var pc=this.jaferGet('PRAGMA page_count').page_count;var ps=this.jaferGet('PRAGMA page_size').page_size;var fc=this.jaferGet('PRAGMA freelist_count').freelist_count;var tb=pc*ps;return{pageCount:pc,pageSize:ps,freelistPages:fc,totalBytes:tb,usedBytes:(pc-fc)*ps,freeBytes:fc*ps,sizeKB:(tb/1024).toFixed(2)}},jaferBackup:function(){this._checkOpen();var data=this._db.export();emit('backup',{bytes:data.length});return new DB(new S.Database(data))},jaferTransaction:function(cb){this._checkOpen();if(typeof cb!=='function')throw new i('Transaction callback must be a function');try{this._db.run('BEGIN');var r=cb(this);this._db.run('COMMIT');return r}catch(e){try{this._db.run('ROLLBACK')}catch(er){}throw new i('Transaction failed, rolled back',e)}},jaferTables:function(){return this.jaferAll("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'").map(r=>r.name)},jaferVersion:function(){var r=this.jaferGet('SELECT sqlite_version() AS version');return r?r.version:''},jaferVacuum:function(){this._db.run('VACUUM');emit('vacuum',{})},jaferClose:function(){if(this._closed)return;this._db.close();this._closed=true},_raw:function(){return this._db}};var JaferSQL={JaferSQLError:e,JaferLoadError:f,JaferInitError:h,JaferQueryError:i,version:'1.4.0',configure:function(opts){if(opts.sqlJsUrl)c.sqlJsUrl=opts.sqlJsUrl;if(opts.wasmLocateFile)c.wasmLocateFile=opts.wasmLocateFile;if(opts.hasOwnProperty('useCache'))c.useCache=opts.useCache;if(opts.cacheHelper)c.cacheHelper=opts.cacheHelper},onProgress:function(cb){pc.push(cb)},offProgress:function(cb){var idx=pc.indexOf(cb);if(idx!==-1)pc.splice(idx,1)},jaferPreload:function(){return ls().then(()=>emit('initialized',{message:'Engine preloaded'}))},jaferInit:function(src){return ls().then(SqlJs=>{emit('initializing',{message:'Creating database instance'});var db=(src instanceof Uint8Array)?new SqlJs.Database(src):new SqlJs.Database();emit('initialized',{message:'Database ready'});return new DB(db)})},jaferIsLoaded:function(){return S!==null},saveToOPFS:async function(db,fn){if(!b)throw new Error('OPFS only in browser');var data=db.jaferExport();var root=await navigator.storage.getDirectory();var fh=await root.getFileHandle(fn,{create:true});var w=await fh.createWritable();await w.write(data);await w.close()},loadFromOPFS:async function(fn){if(!b)throw new Error('OPFS only in browser');var root=await navigator.storage.getDirectory();var fh=await root.getFileHandle(fn);var f=await fh.getFile();var buf=await f.arrayBuffer();return this.jaferInit(new Uint8Array(buf))}};(b?window:self).JaferSQL=JaferSQL})(typeof window!=='undefined'?window:typeof self!=='undefined'?self:global);
+</script>
+
+<script>
+// Global state
+let currentCombinedResult = null;
+let currentDB = null;
+let isFetching = false;
+let isCreatingDb = false;
+
+// DOM elements
+const fetchBtn = document.getElementById('fetchDataBtn');
+const createDbBtn = document.getElementById('createDbBtn');
+const downloadJsonBtn = document.getElementById('downloadJsonBtn');
+const copyJsonBtn = document.getElementById('copyJsonBtn');
+const downloadDbBtn = document.getElementById('downloadDbBtn');
+const preElement = document.getElementById('pre');
+const loader = document.getElementById('loader');
+const statusSpan = document.getElementById('statusMsg');
+
+function updateStatus(msg, isError = false) {
+  statusSpan.innerText = msg;
+  if (isError) console.error(msg);
+  else console.log(msg);
+}
+
+function setLoading(loading) {
+  if (loading) loader.classList.remove('hidden');
+  else loader.classList.add('hidden');
+}
+
+function enableButtons(fetchDone, dbDone) {
+  createDbBtn.disabled = !fetchDone || isCreatingDb;
+  downloadJsonBtn.disabled = !fetchDone;
+  copyJsonBtn.disabled = !fetchDone;
+  downloadDbBtn.disabled = !dbDone;
+}
+
+function getNested(obj, path) {
+  return path.split('.').reduce((current, key) => current?.[key], obj);
+}
+
+// ---------- Fetch Data (now includes stargazers_count, forks_count, updated_at, description, html_url, fork) ----------
+async function fetchData() {
+  if (isFetching) return;
+  isFetching = true;
+  setLoading(true);
+  updateStatus("Starting GitHub data fetch…");
+  fetchBtn.disabled = true;
+
+  const TOKEN = localStorage.getItem('github_token');
+  const headers = TOKEN ? { 'Authorization': `Bearer ${TOKEN}` } : {};
+  const userEndpoint = { name: 'User', url: 'https://api.github.com/users/otapt2011' };
+  const reposEndpoint = { name: 'Repositories', url: 'https://api.github.com/users/otapt2011/repos?per_page=30&page=1&sort=updated&direction=desc' };
+
+  let userData = null;
+  let reposData = [];
+
+  try {
+    // Fetch user
+    updateStatus("Fetching user profile…");
+    const userRes = await fetch(userEndpoint.url, { headers });
+    if (!userRes.ok) throw new Error(`HTTP ${userRes.status}`);
+    const userJson = await userRes.json();
+    const rawUser = userJson.user || userJson;
+    userData = {
+      id: rawUser.id, node_id: rawUser.node_id, name: rawUser.name, login: rawUser.login,
+      email: rawUser.email, avatar_url: rawUser.avatar_url, html_url: rawUser.html_url,
+      url: rawUser.url, created_at: rawUser.created_at
+    };
+    updateStatus(`User fetched: ${userData.login}`);
+
+    // Fetch repos
+    updateStatus("Fetching repositories list…");
+    const reposRes = await fetch(reposEndpoint.url, { headers });
+    if (!reposRes.ok) throw new Error(`HTTP ${reposRes.status}`);
+    const reposJson = await reposRes.json();
+    const rawRepos = reposJson.repositories || reposJson;
+    if (!Array.isArray(rawRepos)) throw new Error('Expected array');
+
+    // Build repository objects with all fields including missing ones
+    reposData = rawRepos.map(repo => ({
+      id: repo.id, node_id: repo.node_id, full_name: repo.full_name, name: repo.name,
+      url: repo.url, trees_url: repo.trees_url, private: repo.private, size: repo.size,
+      owner_type: getNested(repo, 'owner.type'), owner_url: getNested(repo, 'owner.url'),
+      owner_id: getNested(repo, 'owner.id'), owner_node_id: getNested(repo, 'owner.node_id'),
+      owner_html_url: getNested(repo, 'owner.html_url'), language: repo.language,
+      created_at: repo.created_at, default_branch: repo.default_branch,
+      deployments_url: repo.deployments_url,
+      // NEW FIELDS
+      stargazers_count: repo.stargazers_count || 0,
+      forks_count: repo.forks_count || 0,
+      updated_at: repo.updated_at || repo.created_at,
+      description: repo.description || null,
+      html_url: repo.html_url,
+      fork: repo.fork || false,
+      languages: null,
+      tree: null
+    }));
+
+    updateStatus(`Found ${reposData.length} repositories. Fetching languages & file contents…`);
+
+    let processed = 0;
+    await Promise.all(reposData.map(async (repo) => {
+      const languagesUrl = `https://api.github.com/repos/otapt2011/${repo.name}/languages`;
+      const contentsUrl = `https://api.github.com/repos/otapt2011/${repo.name}/contents?ref=main`;
+      const [langRes, contentsRes] = await Promise.all([fetch(languagesUrl, { headers }), fetch(contentsUrl, { headers })]);
+
+      if (langRes.ok) repo.languages = await langRes.json();
+      else repo.languages = { error: `HTTP ${langRes.status}` };
+
+      if (contentsRes.ok) {
+        const contentsData = await contentsRes.json();
+        if (Array.isArray(contentsData)) {
+          repo.tree = contentsData.map(item => ({
+            name: item.name, path: item.path, sha: item.sha, size: item.size, type: item.type,
+            url: item.url, download_url: item.download_url, html_url: item.html_url, file: null
+          }));
+          const fileItems = repo.tree.filter(i => i.type === 'file');
+          await Promise.all(fileItems.map(async (fileItem) => {
+            const fileUrl = `https://api.github.com/repos/otapt2011/${repo.name}/contents/${fileItem.path}?ref=main`;
+            try {
+              const fRes = await fetch(fileUrl, { headers });
+              if (fRes.ok) {
+                const fd = await fRes.json();
+                fileItem.file = {
+                  content: fd.content, download_url: fd.download_url, encoding: fd.encoding,
+                  html_url: fd.html_url, name: fd.name, path: fd.path, sha: fd.sha,
+                  size: fd.size, type: fd.type, url: fd.url
+                };
+              } else fileItem.file = { error: `HTTP ${fRes.status}` };
+            } catch (err) { fileItem.file = { error: err.message }; }
+          }));
+        } else repo.tree = { error: 'Expected array from contents API' };
+      } else repo.tree = { error: `HTTP ${contentsRes.status}` };
+      processed++;
+      updateStatus(`Processed ${processed}/${reposData.length} repos (${repo.name})`);
+    }));
+
+    currentCombinedResult = { user: userData, repositories: reposData };
+    const jsonStr = JSON.stringify(currentCombinedResult, null, 2);
+    //preElement.innerHTML = jsonStr;
+    updateStatus("Fetch completed. Click 'Create Database' to build SQLite DB.");
+    enableButtons(true, false);
+  } catch (err) {
+    updateStatus(`Fetch error: ${err.message}`, true);
+    preElement.innerHTML = `Error: ${err.message}`;
+    enableButtons(false, false);
+  } finally {
+    isFetching = false;
+    setLoading(false);
+    fetchBtn.disabled = false;
+  }
+}
+
+// ---------- Create Database (updated schema with new columns) ----------
+async function createDatabase() {
+  if (!currentCombinedResult || isCreatingDb) return;
+  isCreatingDb = true;
+  setLoading(true);
+  updateStatus("Initialising SQLite engine…");
+  createDbBtn.disabled = true;
+  downloadDbBtn.disabled = true;
+
+  try {
+    if (!window.JaferSQL) throw new Error("JaferSQL not loaded");
+    const db = await window.JaferSQL.jaferInit();
+    currentDB = db;
+    updateStatus("Creating tables…");
+
+    // Create tables – repositories now includes stargazers_count, forks_count, updated_at, description, html_url, fork
+    db.jaferRun(`CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY, node_id TEXT UNIQUE, name TEXT, login TEXT,
+      email TEXT, avatar_url TEXT, html_url TEXT, url TEXT, created_at TEXT
+    )`);
+    db.jaferRun(`CREATE TABLE IF NOT EXISTS repositories (
+      id INTEGER PRIMARY KEY, node_id TEXT UNIQUE, full_name TEXT, name TEXT,
+      url TEXT, trees_url TEXT, private INTEGER, size INTEGER, owner_type TEXT,
+      owner_url TEXT, owner_id INTEGER, owner_node_id TEXT, owner_html_url TEXT,
+      language TEXT, created_at TEXT, default_branch TEXT, deployments_url TEXT,
+      stargazers_count INTEGER, forks_count INTEGER, updated_at TEXT,
+      description TEXT, html_url TEXT, fork INTEGER,
+      user_id INTEGER, FOREIGN KEY(user_id) REFERENCES users(id)
+    )`);
+    db.jaferRun(`CREATE TABLE IF NOT EXISTS languages (
+      id INTEGER PRIMARY KEY, repo_id INTEGER, language_name TEXT, bytes INTEGER,
+      FOREIGN KEY(repo_id) REFERENCES repositories(id)
+    )`);
+    db.jaferRun(`CREATE TABLE IF NOT EXISTS tree_items (
+      id INTEGER PRIMARY KEY, repo_id INTEGER, name TEXT, path TEXT, sha TEXT,
+      size INTEGER, type TEXT CHECK(type IN ('file','dir')), url TEXT,
+      download_url TEXT, html_url TEXT, file_encoding TEXT,
+      FOREIGN KEY(repo_id) REFERENCES repositories(id)
+    )`);
+    db.jaferRun(`CREATE TABLE IF NOT EXISTS file_contents (
+      id INTEGER PRIMARY KEY, tree_item_id INTEGER UNIQUE NOT NULL,
+      content TEXT, encoding TEXT,
+      FOREIGN KEY(tree_item_id) REFERENCES tree_items(id) ON DELETE CASCADE
+    )`);
+
+    updateStatus("Inserting data…");
+    db.jaferRun("BEGIN");
+
+    const u = currentCombinedResult.user;
+    db.jaferRun(`INSERT OR REPLACE INTO users (id, node_id, name, login, email, avatar_url, html_url, url, created_at)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [u.id, u.node_id, u.name, u.login, u.email, u.avatar_url, u.html_url, u.url, u.created_at]);
+
+    let repoCount = 0;
+    for (const repo of currentCombinedResult.repositories) {
+      if (repo.error) continue;
+      db.jaferRun(`INSERT OR REPLACE INTO repositories 
+        (id, node_id, full_name, name, url, trees_url, private, size, owner_type,
+         owner_url, owner_id, owner_node_id, owner_html_url, language, created_at,
+         default_branch, deployments_url, stargazers_count, forks_count, updated_at,
+         description, html_url, fork, user_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [repo.id, repo.node_id, repo.full_name, repo.name, repo.url, repo.trees_url,
+         repo.private ? 1 : 0, repo.size, repo.owner_type, repo.owner_url, repo.owner_id,
+         repo.owner_node_id, repo.owner_html_url, repo.language, repo.created_at,
+         repo.default_branch, repo.deployments_url,
+         repo.stargazers_count, repo.forks_count, repo.updated_at,
+         repo.description, repo.html_url, repo.fork ? 1 : 0, u.id]);
+
+      if (repo.languages && typeof repo.languages === 'object' && !repo.languages.error) {
+        for (const [lang, bytes] of Object.entries(repo.languages)) {
+          db.jaferRun(`INSERT INTO languages (repo_id, language_name, bytes) VALUES (?, ?, ?)`,
+            [repo.id, lang, bytes]);
+        }
+      }
+
+      if (Array.isArray(repo.tree) && !repo.tree.error) {
+        for (const item of repo.tree) {
+          const enc = item.file?.encoding || null;
+          db.jaferRun(`INSERT INTO tree_items 
+            (repo_id, name, path, sha, size, type, url, download_url, html_url, file_encoding)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [repo.id, item.name, item.path, item.sha, item.size, item.type,
+             item.url, item.download_url, item.html_url, enc]);
+          const lastId = db.jaferGet("SELECT last_insert_rowid() as id").id;
+          if (item.type === 'file' && item.file && item.file.content) {
+            db.jaferRun(`INSERT INTO file_contents (tree_item_id, content, encoding) VALUES (?, ?, ?)`,
+              [lastId, item.file.content, item.file.encoding || null]);
+          }
+        }
+      }
+      repoCount++;
+      updateStatus(`Inserted ${repoCount}/${currentCombinedResult.repositories.length} repos…`);
+    }
+    db.jaferRun("COMMIT");
+    updateStatus(`✅ Database created! Tables: ${db.jaferTables().length}, Repos: ${repoCount}`);
+    enableButtons(true, true);
+  } catch (err) {
+    updateStatus(`DB creation failed: ${err.message}`, true);
+    if (currentDB) try { currentDB.jaferRun("ROLLBACK"); } catch(e) {}
+    enableButtons(true, false);
+  } finally {
+    isCreatingDb = false;
+    setLoading(false);
+    createDbBtn.disabled = false;
+  }
+}
+
+// ---------- Download JSON ----------
+function downloadJSON() {
+  if (!currentCombinedResult) return;
+  const jsonStr = JSON.stringify(currentCombinedResult, null, 2);
+  const blob = new Blob([jsonStr], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `github_${currentCombinedResult.user?.login || "user"}_repos.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  updateStatus("JSON downloaded.");
+}
+
+// ---------- Copy JSON ----------
+async function copyJSON() {
+  if (!currentCombinedResult) return;
+  const jsonStr = JSON.stringify(currentCombinedResult, null, 2);
+  try {
+    await navigator.clipboard.writeText(jsonStr);
+    const original = copyJsonBtn.innerHTML;
+    copyJsonBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+    setTimeout(() => { copyJsonBtn.innerHTML = original; }, 1500);
+    updateStatus("JSON copied to clipboard.");
+  } catch (err) {
+    updateStatus("Copy failed: " + err.message, true);
+  }
+}
+
+// ---------- Download Database ----------
+function downloadDatabase() {
+  if (!currentDB) {
+    alert("No database created yet. Please create it first.");
+    return;
+  }
+  try {
+    const dbData = currentDB.jaferExport();
+    const blob = new Blob([dbData], { type: "application/x-sqlite3" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `github_${currentCombinedResult?.user?.login || "user"}_data.db`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    updateStatus("Database file downloaded.");
+  } catch (err) {
+    updateStatus("Export failed: " + err.message, true);
+  }
+}
+
+// Attach event listeners
+fetchBtn.addEventListener('click', fetchData);
+createDbBtn.addEventListener('click', createDatabase);
+downloadJsonBtn.addEventListener('click', downloadJSON);
+copyJsonBtn.addEventListener('click', copyJSON);
+downloadDbBtn.addEventListener('click', downloadDatabase);
+
+// Initial state
+enableButtons(false, false);
+</script>
+</body>
+</html>
