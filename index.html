@@ -124,10 +124,10 @@ const preElement = document.getElementById('pre');
 const loader = document.getElementById('loader');
 const statusSpan = document.getElementById('statusMsg');
 
-//const TOKEN = localStorage.getItem('github_token');
+const TOKEN = localStorage.getItem('github_token');
 //const TOKEN = document.getElementById("github_token").value;
-//const headers = TOKEN ? { 'Authorization': `Bearer ${TOKEN}` } : {};
-//document.getElementById("github_token").value = TOKEN;
+const headers = TOKEN ? { 'Authorization': `Bearer ${TOKEN}` } : {};
+document.getElementById("github_token").value = TOKEN;
 
 function updateStatus(msg, isError = false) {
   statusSpan.innerText = msg;
@@ -161,9 +161,9 @@ async function fetchData() {
   setLoading(true);
   updateStatus("Starting GitHub data fetch…");
   fetchBtn.disabled = true;
-  const TOKEN = document.getElementById("github_token").value;
-const headers = TOKEN ? { 'Authorization': `Bearer ${TOKEN}` } : {};
-  localStorage.setItem('github_token', TOKEN);
+  //const TOKEN = document.getElementById("github_token").value;
+//const headers = TOKEN ? { 'Authorization': `Bearer ${TOKEN}` } : {};
+  //localStorage.setItem('github_token', TOKEN);
   
   const userEndpoint = { name: 'User', url: 'https://api.github.com/users/otapt2011' };
   const reposEndpoint = { name: 'Repositories', url: 'https://api.github.com/users/otapt2011/repos?per_page=30&page=1&sort=updated&direction=desc' };
